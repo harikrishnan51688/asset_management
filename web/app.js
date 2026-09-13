@@ -6,19 +6,22 @@ let activeCategory = 'all';
 
 // Node Color Scheme & Icons
 const NODE_STYLES = {
-    ManagerAgent: { color: { background: '#00f2fe', border: '#38bdf8' }, shape: 'diamond', size: 30, icon: 'fa-shield-halved' },
-    EndpointAgent: { color: { background: '#0284c7', border: '#38bdf8' }, shape: 'dot', size: 24, icon: 'fa-server' },
-    Agent: { color: { background: '#0284c7', border: '#38bdf8' }, shape: 'dot', size: 24, icon: 'fa-server' },
-    IPAddress: { color: { background: '#10b981', border: '#34d399' }, shape: 'hexagon', size: 18, icon: 'fa-network-wired' },
-    OperatingSystem: { color: { background: '#3b82f6', border: '#60a5fa' }, shape: 'square', size: 20, icon: 'fa-brands fa-linux' },
-    HardwareSpec: { color: { background: '#8b5cf6', border: '#a78bfa' }, shape: 'triangle', size: 18, icon: 'fa-microchip' },
-    Vulnerability_Critical: { color: { background: '#ef4444', border: '#f87171' }, shape: 'star', size: 24, icon: 'fa-triangle-exclamation' },
-    Vulnerability_High: { color: { background: '#f97316', border: '#fb923c' }, shape: 'triangleDown', size: 20, icon: 'fa-bug' },
-    Vulnerability_Medium: { color: { background: '#eab308', border: '#facc15' }, shape: 'dot', size: 16, icon: 'fa-bug' },
-    Vulnerability_Low: { color: { background: '#3b82f6', border: '#60a5fa' }, shape: 'dot', size: 14, icon: 'fa-bug' },
-    SoftwarePackage: { color: { background: '#64748b', border: '#94a3b8' }, shape: 'box', size: 14, icon: 'fa-box' },
-    NetworkPort: { color: { background: '#06b6d4', border: '#22d3ee' }, shape: 'ellipse', size: 14, icon: 'fa-plug' },
-    AgentGroup: { color: { background: '#ec4899', border: '#f472b6' }, shape: 'ellipse', size: 16, icon: 'fa-users' }
+    ManagerAgent: { color: { background: '#2563eb', border: '#1d4ed8' }, shape: 'diamond', size: 28, icon: 'fa-shield-halved' },
+    EndpointAgent: { color: { background: '#0284c7', border: '#0369a1' }, shape: 'dot', size: 22, icon: 'fa-server' },
+    Agent: { color: { background: '#0284c7', border: '#0369a1' }, shape: 'dot', size: 22, icon: 'fa-server' },
+    Workstation: { color: { background: '#0891b2', border: '#0e7490' }, shape: 'dot', size: 22, icon: 'fa-desktop' },
+    Server: { color: { background: '#4f46e5', border: '#4338ca' }, shape: 'diamond', size: 26, icon: 'fa-server' },
+    Device: { color: { background: '#0284c7', border: '#0369a1' }, shape: 'dot', size: 20, icon: 'fa-laptop' },
+    IPAddress: { color: { background: '#059669', border: '#047857' }, shape: 'hexagon', size: 18, icon: 'fa-network-wired' },
+    OperatingSystem: { color: { background: '#475569', border: '#334155' }, shape: 'square', size: 20, icon: 'fa-brands fa-linux' },
+    HardwareSpec: { color: { background: '#7c3aed', border: '#6d28d9' }, shape: 'triangle', size: 18, icon: 'fa-microchip' },
+    Vulnerability_Critical: { color: { background: '#dc2626', border: '#b91c1c' }, shape: 'star', size: 24, icon: 'fa-triangle-exclamation' },
+    Vulnerability_High: { color: { background: '#ea580c', border: '#c2410c' }, shape: 'triangleDown', size: 20, icon: 'fa-bug' },
+    Vulnerability_Medium: { color: { background: '#d97706', border: '#b45309' }, shape: 'dot', size: 16, icon: 'fa-bug' },
+    Vulnerability_Low: { color: { background: '#2563eb', border: '#1d4ed8' }, shape: 'dot', size: 14, icon: 'fa-bug' },
+    SoftwarePackage: { color: { background: '#64748b', border: '#475569' }, shape: 'box', size: 14, icon: 'fa-box' },
+    NetworkPort: { color: { background: '#0d9488', border: '#0f766e' }, shape: 'ellipse', size: 14, icon: 'fa-plug' },
+    AgentGroup: { color: { background: '#db2777', border: '#be185d' }, shape: 'ellipse', size: 16, icon: 'fa-users' }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -28,6 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function initEvents() {
     document.getElementById('refreshBtn').addEventListener('click', refreshData);
+
+    const csvFileInput = document.getElementById('csvFileInput');
+    if (csvFileInput) {
+        csvFileInput.addEventListener('change', handleCsvUpload);
+    }
+
+
     document.getElementById('btnFitView').addEventListener('click', () => {
         if (network) network.fit({ animation: { duration: 500 } });
     });
@@ -85,8 +95,53 @@ async function refreshData() {
     }
 }
 
+function handleCsvUpload(e) {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+        processCsvFile(file);
+    }
+    e.target.value = '';
+}
+
+async function processCsvFile(file) {
+    if (!file) return;
+
+    const btn = document.getElementById('importCsvBtn');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Importing...';
+        btn.style.pointerEvents = 'none';
+    }
+
+    try {
+        const text = await file.text();
+        const res = await fetch('/api/import/csv', {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/csv' },
+            body: text
+        });
+        const result = await res.json();
+        if (res.ok && result.status === 'success') {
+            alert(`✅ Successfully imported ${result.imported_nodes} nodes and ${result.imported_relationships} relationships from CSV!`);
+            await loadGraphData();
+        } else {
+            alert(`❌ CSV Import error: ${result.message || 'Unknown error'}`);
+        }
+    } catch (err) {
+        console.error('CSV import failed:', err);
+        alert(`❌ Failed to import CSV: ${err.message}`);
+    } finally {
+        if (btn) {
+            btn.innerHTML = originalText;
+            btn.style.pointerEvents = 'auto';
+        }
+    }
+}
+
+
 function renderDashboard(data) {
     updateMetrics(data);
+
     buildVisGraph(data);
 }
 
@@ -142,11 +197,23 @@ function buildVisGraph(data) {
             color: {
                 background: style.color.background,
                 border: style.color.border,
-                highlight: { background: '#ffffff', border: style.color.background }
+                highlight: { background: style.color.background, border: '#0f172a' }
             },
-            font: { color: '#f3f4f6', face: 'Outfit', size: 12 },
-            borderWidth: 2,
-            shadow: true,
+            font: {
+                color: '#0f172a',
+                face: 'Inter, -apple-system, sans-serif',
+                size: 11,
+                strokeWidth: 3,
+                strokeColor: '#ffffff'
+            },
+            borderWidth: 1.5,
+            shadow: {
+                enabled: true,
+                color: 'rgba(0, 0, 0, 0.08)',
+                size: 6,
+                x: 1,
+                y: 2
+            },
             rawNode: node
         };
     });
@@ -155,9 +222,16 @@ function buildVisGraph(data) {
         from: edge.source,
         to: edge.target,
         label: edge.label || edge.relationship,
-        color: { color: 'rgba(255, 255, 255, 0.15)', highlight: '#00f2fe' },
-        arrows: { to: { enabled: true, scaleFactor: 0.5 } },
-        font: { color: '#9ca3af', size: 9, align: 'middle', strokeWidth: 0 }
+        color: { color: '#cbd5e1', highlight: '#2563eb', hover: '#3b82f6' },
+        arrows: { to: { enabled: true, scaleFactor: 0.6 } },
+        font: {
+            color: '#64748b',
+            face: 'Inter, -apple-system, sans-serif',
+            size: 9,
+            align: 'middle',
+            strokeWidth: 2,
+            strokeColor: '#ffffff'
+        }
     }));
 
     const visData = {
@@ -167,10 +241,11 @@ function buildVisGraph(data) {
 
     const options = {
         nodes: {
-            shadow: { enabled: true, color: 'rgba(0,0,0,0.5)', size: 10 }
+            shadow: { enabled: true, color: 'rgba(0, 0, 0, 0.08)', size: 6, x: 1, y: 2 }
         },
         edges: {
-            smooth: { type: 'continuous' }
+            smooth: { type: 'continuous' },
+            hoverWidth: 1.5
         },
         physics: {
             solver: 'forceAtlas2Based',
@@ -241,7 +316,7 @@ function renderNodeInspector(node) {
 
 function filterGraph(searchQuery, category) {
     if (!network) return;
-    const q = (searchQuery || '').toLowerCase().strip ? searchQuery.toLowerCase().strip() : searchQuery.toLowerCase();
+    const q = (searchQuery || '').trim().toLowerCase();
 
     const filteredNodes = allVisNodes.filter(node => {
         const matchesCategory = (category === 'all') || (node.rawNode.category === category);
@@ -264,5 +339,5 @@ function togglePhysics() {
     physicsEnabled = !physicsEnabled;
     network.setOptions({ physics: { enabled: physicsEnabled } });
     const btn = document.getElementById('btnTogglePhysics');
-    btn.style.color = physicsEnabled ? 'var(--accent-cyan)' : 'var(--text-dim)';
+    btn.style.color = physicsEnabled ? 'var(--primary)' : 'var(--text-dim)';
 }

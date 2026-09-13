@@ -13,6 +13,8 @@ from urllib.parse import urlparse
 from config import SERVER_HOST, SERVER_PORT, GRAPH_JSON_PATH
 from wazuh_collector import fetch_and_generate_graph
 from mcp_server import WazuhMCPToolHandler
+from neo4j_client import neo4j_manager
+
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("WazuhServer")
@@ -25,8 +27,15 @@ class AssetManagementHTTPHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=WEB_DIR, **kwargs)
 
+    def end_headers(self):
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        super().end_headers()
+
     def do_GET(self):
         parsed_path = urlparse(self.path).path
+
 
         if parsed_path == "/api/graph":
             self._send_json(self._get_graph_data())
@@ -40,12 +49,13 @@ class AssetManagementHTTPHandler(http.server.SimpleHTTPRequestHandler):
             agent_id = parsed_path.split("/")[-1]
             vulns = WazuhMCPToolHandler.get_agent_vulnerabilities(agent_id)
             self._send_json(vulns)
+        elif parsed_path == "/sample_assets.csv":
+            sample_path = os.path.join(os.path.dirname(__file__), "sample_assets.csv")
+            self._send_file(sample_path, "text/csv")
         elif parsed_path == "/asset_graph.json":
             self._send_file(GRAPH_JSON_PATH, "application/json")
-        elif parsed_path.startswith("/ontology/"):
-            ttl_path = os.path.join(os.path.dirname(__file__), parsed_path.lstrip("/"))
-            self._send_file(ttl_path, "text/turtle")
         else:
+
             # Default static file handler
             super().do_GET()
 
@@ -56,19 +66,59 @@ class AssetManagementHTTPHandler(http.server.SimpleHTTPRequestHandler):
             logger.info("Triggering Wazuh API live refresh...")
             res = WazuhMCPToolHandler.refresh_wazuh_data()
             self._send_json(res)
+        elif parsed_path == "/api/import/csv":
+            logger.info("Received CSV asset import request...")
+            content_length = int(self.headers.get("Content-Length", 0))
+            if content_length == 0:
+                self._send_json({"status": "error", "message": "Empty CSV payload"}, status=400)
+                return
+
+            raw_data = self.rfile.read(content_length)
+            content_type = self.headers.get("Content-Type", "")
+
+            # Handle multipart/form-data or raw CSV text
+            csv_text = ""
+            if "multipart/form-data" in content_type:
+                parts = raw_data.split(b"\r\n\r\n", 1)
+                if len(parts) > 1:
+                    body = parts[1]
+                    boundary_idx = body.rfind(b"\r\n--")
+                    if boundary_idx != -1:
+                        body = body[:boundary_idx]
+                    csv_text = body.decode("utf-8-sig", errors="ignore")
+            else:
+                csv_text = raw_data.decode("utf-8-sig", errors="ignore")
+
+            from csv_importer import import_csv_content
+            res = import_csv_content(csv_text)
+            self._send_json(res, status=200 if res.get("status") == "success" else 400)
         else:
             self.send_error(404, "Endpoint not found")
 
+
     def _get_graph_data(self):
-        if not os.path.exists(GRAPH_JSON_PATH):
-            logger.info("Graph file missing. Generating initial snapshot...")
-            return fetch_and_generate_graph() or {"nodes": [], "edges": [], "error": "Fetch failed"}
-        try:
-            with open(GRAPH_JSON_PATH, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception as e:
-            logger.error(f"Error loading graph JSON: {e}")
-            return {"nodes": [], "edges": [], "error": str(e)}
+        if neo4j_manager.is_connected():
+            graph_data = neo4j_manager.fetch_full_graph()
+            if graph_data.get("nodes"):
+                return graph_data
+            logger.info("Neo4j database is empty. Triggering initial fetch or seed...")
+            fetched = fetch_and_generate_graph()
+            graph_data = neo4j_manager.fetch_full_graph()
+            if graph_data.get("nodes"):
+                return graph_data
+            if fetched and fetched.get("nodes"):
+                return fetched
+        
+        if os.path.exists(GRAPH_JSON_PATH):
+            try:
+                with open(GRAPH_JSON_PATH, "r", encoding="utf-8") as f:
+                    return json.load(f)
+            except Exception as e:
+                logger.error(f"Error loading graph JSON fallback: {e}")
+
+        return fetch_and_generate_graph() or {"nodes": [], "edges": [], "error": "Fetch failed"}
+
+
 
     def _send_json(self, data, status=200):
         body = json.dumps(data, indent=2).encode("utf-8")

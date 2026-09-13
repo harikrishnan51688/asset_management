@@ -3,7 +3,9 @@ import logging
 import urllib3
 import requests
 import os
-from config import WAZUH_HOST, WAZUH_USER, WAZUH_PASSWORD, VERIFY_SSL, GRAPH_JSON_PATH, GRAPH_TTL_PATH
+from config import WAZUH_HOST, WAZUH_USER, WAZUH_PASSWORD, VERIFY_SSL, GRAPH_JSON_PATH
+from neo4j_client import neo4j_manager
+
 
 # Disable SSL warnings for self-signed certificates
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -347,50 +349,39 @@ class WazuhOntologyGraphBuilder:
             "edges": self.edges
         }
 
-    def export_ttl(self, graph_data, filepath=GRAPH_TTL_PATH):
-        """Export the graph as RDF Turtle file."""
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write("@prefix asset: <http://wazuh.asset.management/ontology#> .\n")
-            f.write("@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n")
-            f.write("@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n\n")
-
-            for node in graph_data["nodes"]:
-                node_uri = f"asset:{node['id']}"
-                f.write(f"{node_uri} a asset:{node['type']} ;\n")
-                f.write(f'    rdfs:label "{node["label"]}" ;\n')
-                for k, v in node["properties"].items():
-                    if v and isinstance(v, (str, int, float)):
-                        clean_v = str(v).replace('"', '\\"')
-                        f.write(f'    asset:{k} "{clean_v}" ;\n')
-                f.seek(f.tell() - 3, os.SEEK_SET) # overwrite trailing semicolon
-                f.write(" .\n\n")
-
-            for edge in graph_data["edges"]:
-                f.write(f"asset:{edge['source']} asset:{edge['relationship']} asset:{edge['target']} .\n")
-
-        logger.info(f"Exported TTL Ontology Graph to {filepath}")
-
-
 def fetch_and_generate_graph():
-    """Main function to query Wazuh API and generate JSON & TTL graph files."""
+    """Main function to query Wazuh API, save JSON snapshot, and sync into Neo4j graph database."""
     client = WazuhAPIClient()
-    if not client.authenticate():
-        logger.error("Authentication failed. Cannot fetch Wazuh telemetry.")
-        return None
+    graph_data = None
+    if client.authenticate():
+        builder = WazuhOntologyGraphBuilder(client)
+        graph_data = builder.build_graph()
 
-    builder = WazuhOntologyGraphBuilder(client)
-    graph_data = builder.build_graph()
+        # Save to JSON
+        with open(GRAPH_JSON_PATH, "w", encoding="utf-8") as f:
+            json.dump(graph_data, f, indent=2)
+        logger.info(f"Exported Knowledge Graph JSON to {GRAPH_JSON_PATH}")
+    else:
+        logger.warning("Wazuh API authentication/connection failed.")
+        if os.path.exists(GRAPH_JSON_PATH):
+            try:
+                logger.info(f"Seeding from existing graph snapshot at {GRAPH_JSON_PATH}...")
+                with open(GRAPH_JSON_PATH, "r", encoding="utf-8") as f:
+                    graph_data = json.load(f)
+            except Exception as e:
+                logger.error(f"Failed to read existing {GRAPH_JSON_PATH}: {e}")
 
-    # Save to JSON
-    with open(GRAPH_JSON_PATH, "w", encoding="utf-8") as f:
-        json.dump(graph_data, f, indent=2)
-    logger.info(f"Exported Knowledge Graph JSON to {GRAPH_JSON_PATH}")
-
-    # Save to Turtle TTL
-    builder.export_ttl(graph_data)
+    # Sync to Neo4j Graph Database
+    if graph_data and neo4j_manager.is_connected():
+        logger.info("Syncing telemetry graph into Neo4j database...")
+        neo4j_manager.sync_graph_data(graph_data)
+    else:
+        logger.warning("Neo4j database connection unavailable or graph data is empty.")
 
     return graph_data
 
 if __name__ == "__main__":
     fetch_and_generate_graph()
+
+
+

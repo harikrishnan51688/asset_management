@@ -1,0 +1,6 @@
+device_id,name,ip,device_type,os_name,os_version,status,group,cpu,ram_gb,mac_address,open_ports,description
+pc-fin-01,Finance-Desktop-01,192.168.1.110,Workstation,Windows 11 Pro,23H2,active,Finance,Intel Core i7-13700,32,00:1A:2B:3C:4D:5E,"445,3389",Accounts Team Primary Workstation
+pc-fin-02,Finance-Desktop-02,192.168.1.111,Workstation,Windows 11 Pro,23H2,active,Finance,Intel Core i5-13400,16,00:1A:2B:3C:4D:5F,"445,3389",Auditing Workstation
+pc-hr-01,HR-Laptop-01,192.168.1.120,EndpointAgent,macOS Sonoma,14.5,active,HumanResources,Apple M2 Pro,16,A4:83:E7:2B:11:0A,"22",HR Director MacBook
+srv-backup-01,NAS-Storage-Server,192.168.1.200,Server,Ubuntu Server,24.04,active,Infrastructure,AMD EPYC 7302P,64,00:25:90:AB:CD:EF,"22,80,443,2049",Offline Local Backup NAS
+pc-legacy-01,Warehouse-Terminal,192.168.1.150,Workstation,Windows 10 Enterprise,21H2,disconnected,Logistics,Intel Core i3-8100,8,00:14:22:98:76:54,"139,445",Barcode Scanning Station

@@ -4,19 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wazuh Asset Management & Security Ontology Graph</title>
+    <title>Wazuh Asset Manager & Neo4j Knowledge Graph</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Vis-Network Graph CSS & JS -->
     <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=5">
 </head>
 
 <body>
@@ -25,24 +23,24 @@
         <header class="navbar">
             <div class="brand">
                 <div class="logo-icon">
-                    <i class="fa-solid fa-network-wired"></i>
+                    <i class="fa-solid fa-server"></i>
                 </div>
                 <div class="brand-text">
-                    <h1>Wazuh Asset <span>Manager</span></h1>
-                    <p>IT Infrastructure & Vulnerability Knowledge Graph</p>
+                    <h1>Wazuh Asset Manager</h1>
+                    <p>IT Asset Management & Neo4j Knowledge Graph</p>
                 </div>
             </div>
 
             <div class="nav-controls">
-                <div class="status-badge" id="serverStatusBadge">
-                    <span class="status-dot online"></span>
-                    <span id="serverStatusText">Wazuh API: 192.168.1.38</span>
-                </div>
-
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="searchInput" placeholder="Search agents, IPs, CVEs, OS...">
+                    <input type="text" id="searchInput" placeholder="Search devices, IPs, CVEs, OS, ports...">
                 </div>
+
+                <label for="csvFileInput" class="btn btn-secondary" id="importCsvBtn" title="Upload CSV file of unmanaged assets">
+                    <i class="fa-solid fa-file-arrow-up"></i> Import CSV
+                    <input type="file" id="csvFileInput" accept=".csv,text/csv" style="display: none;">
+                </label>
 
                 <button class="btn btn-primary" id="refreshBtn">
                     <i class="fa-solid fa-arrows-rotate"></i> Sync Wazuh API
@@ -55,36 +53,36 @@
             <!-- Left Sidebar Analytics -->
             <aside class="sidebar-left">
                 <div class="panel-header">
-                    <h2><i class="fa-solid fa-chart-pie"></i> Asset Summary</h2>
+                    <h2><i class="fa-solid fa-chart-simple"></i> Asset Overview</h2>
                 </div>
 
                 <div class="metrics-grid">
-                    <div class="metric-card cyan">
-                        <div class="metric-icon"><i class="fa-solid fa-server"></i></div>
+                    <div class="metric-card">
+                        <div class="metric-icon blue"><i class="fa-solid fa-desktop"></i></div>
                         <div class="metric-info">
                             <span class="metric-value" id="statAgentCount">0</span>
-                            <span class="metric-label">Wazuh Agents</span>
+                            <span class="metric-label">Total Devices</span>
                         </div>
                     </div>
 
-                    <div class="metric-card blue">
-                        <div class="metric-icon"><i class="fa-solid fa-ethernet"></i></div>
+                    <div class="metric-card">
+                        <div class="metric-icon emerald"><i class="fa-solid fa-network-wired"></i></div>
                         <div class="metric-info">
                             <span class="metric-value" id="statIpCount">0</span>
                             <span class="metric-label">IP Addresses</span>
                         </div>
                     </div>
 
-                    <div class="metric-card purple">
-                        <div class="metric-icon"><i class="fa-solid fa-diagram-project"></i></div>
+                    <div class="metric-card">
+                        <div class="metric-icon indigo"><i class="fa-solid fa-diagram-project"></i></div>
                         <div class="metric-info">
                             <span class="metric-value" id="statNodeCount">0</span>
-                            <span class="metric-label">Ontology Nodes</span>
+                            <span class="metric-label">Graph Nodes</span>
                         </div>
                     </div>
 
-                    <div class="metric-card amber">
-                        <div class="metric-icon"><i class="fa-solid fa-shield-cat"></i></div>
+                    <div class="metric-card">
+                        <div class="metric-icon slate"><i class="fa-solid fa-bezier-curve"></i></div>
                         <div class="metric-info">
                             <span class="metric-value" id="statEdgeCount">0</span>
                             <span class="metric-label">Relationships</span>
@@ -94,7 +92,7 @@
 
                 <!-- Vulnerabilities Severity Section -->
                 <div class="vulnerability-summary-card">
-                    <h3><i class="fa-solid fa-bug"></i> Vulnerabilities</h3>
+                    <h3><i class="fa-solid fa-shield-virus"></i> Security Vulnerabilities</h3>
                     <div class="severity-bars">
                         <div class="sev-row critical" data-sev="Critical">
                             <span class="sev-label"><span class="badge red">Critical</span></span>
@@ -129,24 +127,23 @@
 
                 <!-- Filters -->
                 <div class="filter-section">
-                    <h3><i class="fa-solid fa-filter"></i> Category Filter</h3>
+                    <h3><i class="fa-solid fa-filter"></i> Filter Graph View</h3>
                     <div class="category-pills" id="categoryPills">
                         <button class="pill active" data-cat="all">All</button>
-                        <button class="pill" data-cat="agent">Agents</button>
-                        <button class="pill" data-cat="network">IP Addresses</button>
-                        <button class="pill" data-cat="os">OS Specs</button>
-                        <button class="pill" data-cat="vulnerability">Vulnerabilities</button>
+                        <button class="pill" data-cat="agent">Devices</button>
+                        <button class="pill" data-cat="network">IPs</button>
+                        <button class="pill" data-cat="os">Operating Systems</button>
+                        <button class="pill" data-cat="vulnerability">CVEs</button>
                         <button class="pill" data-cat="hardware">Hardware</button>
                     </div>
                 </div>
 
-                <!-- MCP Server Tool Box -->
-                <div class="mcp-info-box">
-                    <div class="mcp-header">
-                        <i class="fa-solid fa-robot"></i> MCP Chatbot Integration
+                <!-- Backend Database Info Card -->
+                <div class="db-info-card">
+                    <div class="db-header">
+                        <i class="fa-solid fa-database"></i> Neo4j Database
                     </div>
-                    <p>Connected to MCP Tool server (<code>mcp_server.py</code>). Your AI chatbot can query assets &
-                        CVEs via stdio/REST.</p>
+                    <p>Connected to <code>bolt://localhost:7687</code>. Open <a href="http://localhost:7474" target="_blank">Neo4j Browser</a> to run custom Cypher queries.</p>
                 </div>
             </aside>
 
@@ -154,18 +151,17 @@
             <section class="graph-canvas-container">
                 <div class="canvas-toolbar">
                     <div class="view-controls">
-                        <button class="icon-btn" id="btnFitView" title="Reset Camera"><i
-                                class="fa-solid fa-expand"></i></button>
-                        <button class="icon-btn" id="btnTogglePhysics" title="Toggle Graph Physics"><i
-                                class="fa-solid fa-atom"></i></button>
+                        <button class="icon-btn" id="btnFitView" title="Reset Camera View"><i class="fa-solid fa-expand"></i></button>
+                        <button class="icon-btn" id="btnTogglePhysics" title="Toggle Force Physics"><i class="fa-solid fa-atom"></i></button>
                     </div>
                     <div class="legend-bar">
-                        <span class="legend-item"><span class="dot agent"></span> Agent</span>
+                        <span class="legend-item"><span class="dot agent"></span> Endpoint / PC</span>
+                        <span class="legend-item"><span class="dot server"></span> Server / Manager</span>
                         <span class="legend-item"><span class="dot os"></span> OS</span>
                         <span class="legend-item"><span class="dot network"></span> IP Address</span>
-                        <span class="legend-item"><span class="dot vuln-critical"></span> Critical CVE</span>
-                        <span class="legend-item"><span class="dot vuln-high"></span> High CVE</span>
                         <span class="legend-item"><span class="dot hardware"></span> Hardware</span>
+                        <span class="legend-item"><span class="dot port"></span> Open Port</span>
+                        <span class="legend-item"><span class="dot vuln-critical"></span> Critical CVE</span>
                     </div>
                 </div>
 
@@ -176,14 +172,13 @@
             <!-- Right Sidebar Node Inspector -->
             <aside class="sidebar-right" id="inspectorPanel">
                 <div class="panel-header">
-                    <h2><i class="fa-solid fa-circle-info"></i> Asset Inspector</h2>
+                    <h2><i class="fa-solid fa-circle-info"></i> Asset Details</h2>
                 </div>
 
                 <div class="inspector-content" id="inspectorContent">
                     <div class="empty-state">
-                        <i class="fa-solid fa-mouse-pointer"></i>
-                        <p>Click any node on the graph canvas to inspect detailed ontology metadata & CVE attributes.
-                        </p>
+                        <i class="fa-solid fa-arrow-pointer"></i>
+                        <p>Select any node on the graph to inspect detailed asset properties, network specifications, and vulnerability attributes.</p>
                     </div>
                 </div>
             </aside>
@@ -191,7 +186,7 @@
     </div>
 
     <!-- Custom JS -->
-    <script src="app.js"></script>
+    <script src="app.js?v=5"></script>
 </body>
 
 </html>
