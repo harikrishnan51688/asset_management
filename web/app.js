@@ -15,11 +15,6 @@ const NODE_STYLES = {
     IPAddress: { color: { background: '#059669', border: '#047857' }, shape: 'hexagon', size: 18, icon: 'fa-network-wired' },
     OperatingSystem: { color: { background: '#475569', border: '#334155' }, shape: 'square', size: 20, icon: 'fa-brands fa-linux' },
     HardwareSpec: { color: { background: '#7c3aed', border: '#6d28d9' }, shape: 'triangle', size: 18, icon: 'fa-microchip' },
-    Vulnerability_Critical: { color: { background: '#dc2626', border: '#b91c1c' }, shape: 'star', size: 24, icon: 'fa-triangle-exclamation' },
-    Vulnerability_High: { color: { background: '#ea580c', border: '#c2410c' }, shape: 'triangleDown', size: 20, icon: 'fa-bug' },
-    Vulnerability_Medium: { color: { background: '#d97706', border: '#b45309' }, shape: 'dot', size: 16, icon: 'fa-bug' },
-    Vulnerability_Low: { color: { background: '#2563eb', border: '#1d4ed8' }, shape: 'dot', size: 14, icon: 'fa-bug' },
-    SoftwarePackage: { color: { background: '#64748b', border: '#475569' }, shape: 'box', size: 14, icon: 'fa-box' },
     NetworkPort: { color: { background: '#0d9488', border: '#0f766e' }, shape: 'ellipse', size: 14, icon: 'fa-plug' },
     AgentGroup: { color: { background: '#db2777', border: '#be185d' }, shape: 'ellipse', size: 16, icon: 'fa-users' }
 };
@@ -149,45 +144,20 @@ function updateMetrics(data) {
     const nodes = data.nodes || [];
     const edges = data.edges || [];
 
-    const agents = nodes.filter(n => n.type.includes('Agent'));
+    const agents = nodes.filter(n => n.type && (n.type.includes('Agent') || ['Workstation', 'Server', 'Device'].includes(n.type)));
     const ips = nodes.filter(n => n.type === 'IPAddress');
-    const vulns = nodes.filter(n => n.type === 'Vulnerability');
 
     document.getElementById('statAgentCount').textContent = agents.length;
     document.getElementById('statIpCount').textContent = ips.length;
     document.getElementById('statNodeCount').textContent = nodes.length;
     document.getElementById('statEdgeCount').textContent = edges.length;
-
-    // Vulnerability Counts
-    const sevCounts = { Critical: 0, High: 0, Medium: 0, Low: 0 };
-    vulns.forEach(v => {
-        const s = v.properties.severity || 'Medium';
-        if (sevCounts[s] !== undefined) sevCounts[s]++;
-        else sevCounts['Medium']++;
-    });
-
-    const maxVuln = Math.max(...Object.values(sevCounts), 1);
-    document.getElementById('countCritical').textContent = sevCounts.Critical;
-    document.getElementById('countHigh').textContent = sevCounts.High;
-    document.getElementById('countMedium').textContent = sevCounts.Medium;
-    document.getElementById('countLow').textContent = sevCounts.Low;
-
-    document.getElementById('barCritical').style.width = `${(sevCounts.Critical / maxVuln) * 100}%`;
-    document.getElementById('barHigh').style.width = `${(sevCounts.High / maxVuln) * 100}%`;
-    document.getElementById('barMedium').style.width = `${(sevCounts.Medium / maxVuln) * 100}%`;
-    document.getElementById('barLow').style.width = `${(sevCounts.Low / maxVuln) * 100}%`;
 }
 
 function buildVisGraph(data) {
     const container = document.getElementById('networkGraph');
 
     allVisNodes = (data.nodes || []).map(node => {
-        let styleKey = node.type;
-        if (node.type === 'Vulnerability') {
-            const sev = node.properties.severity || 'Medium';
-            styleKey = `Vulnerability_${sev}`;
-        }
-        const style = NODE_STYLES[styleKey] || NODE_STYLES.SoftwarePackage;
+        const style = NODE_STYLES[node.type] || NODE_STYLES.EndpointAgent;
 
         return {
             id: node.id,

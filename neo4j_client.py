@@ -62,8 +62,7 @@ class Neo4jGraphManager:
         constraints = [
             "CREATE CONSTRAINT asset_id_unique IF NOT EXISTS FOR (n:AssetNode) REQUIRE n.id IS UNIQUE;",
             "CREATE INDEX asset_type_idx IF NOT EXISTS FOR (n:AssetNode) ON (n.node_type);",
-            "CREATE INDEX agent_id_idx IF NOT EXISTS FOR (n:AssetNode) ON (n.agent_id);",
-            "CREATE INDEX cve_id_idx IF NOT EXISTS FOR (n:AssetNode) ON (n.cve_id);"
+            "CREATE INDEX agent_id_idx IF NOT EXISTS FOR (n:AssetNode) ON (n.agent_id);"
         ]
         
         try:
@@ -237,21 +236,11 @@ class Neo4jGraphManager:
                 RETURN collect(o.label) AS os_labels
                 """).single()
 
-                vuln_res = session.run("""
-                MATCH (v:AssetNode) WHERE v.node_type = 'Vulnerability'
-                RETURN count(v) AS total,
-                       sum(CASE WHEN coalesce(v.severity, '') = 'Critical' THEN 1 ELSE 0 END) AS critical,
-                       sum(CASE WHEN coalesce(v.severity, '') = 'High' THEN 1 ELSE 0 END) AS high,
-                       sum(CASE WHEN coalesce(v.severity, '') = 'Medium' THEN 1 ELSE 0 END) AS medium,
-                       sum(CASE WHEN coalesce(v.severity, '') = 'Low' THEN 1 ELSE 0 END) AS low
-                """).single()
-
-
                 total_nodes_res = session.run("MATCH (n:AssetNode) RETURN count(n) AS total").single()
                 total_rels_res = session.run("MATCH ()-[r]->() RETURN count(r) AS total").single()
 
                 return {
-                    "summary": "Wazuh IT Asset Management & Security Overview (Neo4j)",
+                    "summary": "Wazuh IT Asset Management Overview (Neo4j)",
                     "database": "Neo4j Graph Database",
                     "total_nodes": total_nodes_res["total"] if total_nodes_res else 0,
                     "total_relationships": total_rels_res["total"] if total_rels_res else 0,
@@ -264,16 +253,7 @@ class Neo4jGraphManager:
                         "total_unique_ips": ip_res["total"] if ip_res else 0,
                         "ip_addresses": [ip for ip in (ip_res["ips"] if ip_res else []) if ip]
                     },
-                    "operating_systems": os_res["os_labels"] if os_res else [],
-                    "vulnerability_metrics": {
-                        "total_cves_detected": vuln_res["total"] if vuln_res else 0,
-                        "by_severity": {
-                            "Critical": vuln_res["critical"] if vuln_res else 0,
-                            "High": vuln_res["high"] if vuln_res else 0,
-                            "Medium": vuln_res["medium"] if vuln_res else 0,
-                            "Low": vuln_res["low"] if vuln_res else 0
-                        }
-                    }
+                    "operating_systems": os_res["os_labels"] if os_res else []
                 }
         except Exception as e:
             logger.error(f"Error executing Neo4j summary query: {e}")
@@ -307,51 +287,6 @@ class Neo4jGraphManager:
             logger.error(f"Error listing agents from Neo4j: {e}")
             return []
 
-    def get_agent_vulnerabilities(self, agent_id: str) -> Dict[str, Any]:
-        """Fetch vulnerabilities connected to a specific agent in Neo4j."""
-        if not self.is_connected():
-            return {"error": "Neo4j connection unavailable"}
-
-        try:
-            target_agent_id = str(agent_id).zfill(3) if str(agent_id).isdigit() else str(agent_id)
-
-            with self._driver.session() as session:
-                # Find agent node
-                agent_res = session.run("""
-                MATCH (a:AssetNode) 
-                WHERE a.node_type IN ['Agent', 'ManagerAgent', 'EndpointAgent', 'Workstation', 'Server', 'Device']
-                  AND (a.agent_id = $agent_id OR a.name = $raw_id)
-                RETURN a.agent_id AS agent_id, a.name AS name, a.ip AS ip
-                """, agent_id=target_agent_id, raw_id=str(agent_id)).single()
-
-
-                if not agent_res:
-                    return {"error": f"Agent '{agent_id}' not found in Neo4j database."}
-
-                # Query vulnerabilities connected to agent
-                vuln_res = session.run("""
-                MATCH (a:AssetNode)-[:HAS_VULNERABILITY]->(v:AssetNode)
-                WHERE (a.agent_id = $agent_id OR a.name = $raw_id) AND v.node_type = 'Vulnerability'
-                RETURN v.cve_id AS cve_id, v.severity AS severity, v.cvss_score AS cvss_score,
-                       v.title AS title, v.package_name AS package_name, v.package_version AS package_version
-                """, agent_id=target_agent_id, raw_id=str(agent_id))
-
-                vulnerabilities = [dict(record) for record in vuln_res]
-
-                sev_priority = {"Critical": 0, "High": 1, "Medium": 2, "Low": 3}
-                vulnerabilities.sort(key=lambda x: sev_priority.get(x.get("severity", "Medium"), 4))
-
-                return {
-                    "agent_id": agent_res["agent_id"],
-                    "agent_name": agent_res["name"],
-                    "agent_ip": agent_res["ip"],
-                    "vulnerability_count": len(vulnerabilities),
-                    "vulnerabilities": vulnerabilities
-                }
-        except Exception as e:
-            logger.error(f"Error fetching agent vulnerabilities from Neo4j: {e}")
-            return {"error": str(e)}
-
     def search_assets(self, query: str) -> List[Dict[str, Any]]:
         """Search Neo4j nodes by keyword matching."""
         if not self.is_connected():
@@ -366,8 +301,6 @@ class Neo4jGraphManager:
                    OR toLower(n.label) CONTAINS $q
                    OR toLower(coalesce(n.name, '')) CONTAINS $q
                    OR toLower(coalesce(n.ip, '')) CONTAINS $q
-                   OR toLower(coalesce(n.cve_id, '')) CONTAINS $q
-                   OR toLower(coalesce(n.title, '')) CONTAINS $q
                 RETURN n LIMIT 30
                 """, q=q)
 

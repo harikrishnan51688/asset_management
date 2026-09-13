@@ -34,7 +34,7 @@
             <div class="nav-controls">
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="searchInput" placeholder="Search devices, IPs, CVEs, OS, ports...">
+                    <input type="text" id="searchInput" placeholder="Search devices, IPs, OS, ports, hardware...">
                 </div>
 
                 <label for="csvFileInput" class="btn btn-secondary" id="importCsvBtn" title="Upload CSV file of unmanaged assets">
@@ -90,41 +90,6 @@
                     </div>
                 </div>
 
-                <!-- Vulnerabilities Severity Section -->
-                <div class="vulnerability-summary-card">
-                    <h3><i class="fa-solid fa-shield-virus"></i> Security Vulnerabilities</h3>
-                    <div class="severity-bars">
-                        <div class="sev-row critical" data-sev="Critical">
-                            <span class="sev-label"><span class="badge red">Critical</span></span>
-                            <div class="sev-bar-container">
-                                <div class="sev-bar red" id="barCritical" style="width: 0%"></div>
-                            </div>
-                            <span class="sev-count" id="countCritical">0</span>
-                        </div>
-                        <div class="sev-row high" data-sev="High">
-                            <span class="sev-label"><span class="badge orange">High</span></span>
-                            <div class="sev-bar-container">
-                                <div class="sev-bar orange" id="barHigh" style="width: 0%"></div>
-                            </div>
-                            <span class="sev-count" id="countHigh">0</span>
-                        </div>
-                        <div class="sev-row medium" data-sev="Medium">
-                            <span class="sev-label"><span class="badge yellow">Medium</span></span>
-                            <div class="sev-bar-container">
-                                <div class="sev-bar yellow" id="barMedium" style="width: 0%"></div>
-                            </div>
-                            <span class="sev-count" id="countMedium">0</span>
-                        </div>
-                        <div class="sev-row low" data-sev="Low">
-                            <span class="sev-label"><span class="badge blue">Low</span></span>
-                            <div class="sev-bar-container">
-                                <div class="sev-bar blue" id="barLow" style="width: 0%"></div>
-                            </div>
-                            <span class="sev-count" id="countLow">0</span>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Filters -->
                 <div class="filter-section">
                     <h3><i class="fa-solid fa-filter"></i> Filter Graph View</h3>
@@ -133,7 +98,6 @@
                         <button class="pill" data-cat="agent">Devices</button>
                         <button class="pill" data-cat="network">IPs</button>
                         <button class="pill" data-cat="os">Operating Systems</button>
-                        <button class="pill" data-cat="vulnerability">CVEs</button>
                         <button class="pill" data-cat="hardware">Hardware</button>
                     </div>
                 </div>
@@ -161,7 +125,6 @@
                         <span class="legend-item"><span class="dot network"></span> IP Address</span>
                         <span class="legend-item"><span class="dot hardware"></span> Hardware</span>
                         <span class="legend-item"><span class="dot port"></span> Open Port</span>
-                        <span class="legend-item"><span class="dot vuln-critical"></span> Critical CVE</span>
                     </div>
                 </div>
 
@@ -178,7 +141,7 @@
                 <div class="inspector-content" id="inspectorContent">
                     <div class="empty-state">
                         <i class="fa-solid fa-arrow-pointer"></i>
-                        <p>Select any node on the graph to inspect detailed asset properties, network specifications, and vulnerability attributes.</p>
+                        <p>Select any node on the graph to inspect detailed asset properties, network specifications, and system attributes.</p>
                     </div>
                 </div>
             </aside>

@@ -74,25 +74,8 @@ class WazuhAPIClient:
         data = self._get(f"/syscollector/{agent_id}/netaddr", silent=True)
         return data.get("data", {}).get("affected_items", []) if data else []
 
-    def get_vulnerabilities(self, agent_id):
-        endpoints = [
-            f"/vulnerability/{agent_id}",
-            f"/vulnerability/{agent_id}/cve",
-            f"/vulnerability/agents/{agent_id}",
-            f"/syscollector/{agent_id}/vulnerabilities"
-        ]
-        for ep in endpoints:
-            data = self._get(ep, silent=True)
-            if data and data.get("data") and data["data"].get("affected_items"):
-                return data["data"]["affected_items"]
-        return []
-
     def get_ports(self, agent_id):
         data = self._get(f"/syscollector/{agent_id}/ports", silent=True)
-        return data.get("data", {}).get("affected_items", []) if data else []
-
-    def get_packages(self, agent_id, limit=50):
-        data = self._get(f"/syscollector/{agent_id}/packages", params={"limit": limit})
         return data.get("data", {}).get("affected_items", []) if data else []
 
 
@@ -227,7 +210,7 @@ class WazuhOntologyGraphBuilder:
                 if node_data["type"] == "EndpointAgent":
                     self._add_edge(node_id, manager_node_id, "managedBy", "managed by")
 
-        # Second Pass: Telemetry collector (Hardware, Network Interfaces, Vulnerabilities, Ports)
+        # Second Pass: Telemetry collector (Hardware, Network Interfaces, Ports)
         for agent in agents:
             agent_id = str(agent.get("id"))
             agent_node_id = f"agent_{agent_id}"
@@ -295,48 +278,6 @@ class WazuhOntologyGraphBuilder:
                     )
                     self._add_edge(agent_node_id, port_id, "hasPort", "has port")
 
-            # 4. Vulnerabilities
-            vulns = self.api.get_vulnerabilities(agent_id)
-            logger.info(f"Found {len(vulns)} vulnerabilities for Agent {agent_id}.")
-            for v in vulns:
-                cve_id = v.get("cve") or v.get("cve_id", "CVE-UNKNOWN")
-                severity = (v.get("severity") or "Medium").capitalize()
-                title = v.get("title") or v.get("description", cve_id)
-                cvss = v.get("cvss3_score") or v.get("cvss2_score") or v.get("score") or "N/A"
-                pkg_name = v.get("pkg_name") or v.get("package", {}).get("name", "")
-                pkg_ver = v.get("pkg_version") or v.get("package", {}).get("version", "")
-
-                vuln_id = f"vuln_{cve_id.replace('-', '_')}_{agent_id}"
-
-                self._add_node(
-                    node_id=vuln_id,
-                    label=f"{cve_id} [{severity}]",
-                    node_type="Vulnerability",
-                    properties={
-                        "cve_id": cve_id,
-                        "severity": severity,
-                        "title": title,
-                        "cvss_score": str(cvss),
-                        "package_name": pkg_name,
-                        "package_version": pkg_ver,
-                        "rationale": v.get("rationale", "")
-                    },
-                    category="vulnerability"
-                )
-                self._add_edge(agent_node_id, vuln_id, "hasVulnerability", "has vulnerability")
-
-                # If package is associated, link to SoftwarePackage node
-                if pkg_name:
-                    pkg_id = f"pkg_{pkg_name.lower()}_{agent_id}"
-                    self._add_node(
-                        node_id=pkg_id,
-                        label=f"Pkg: {pkg_name}",
-                        node_type="SoftwarePackage",
-                        properties={"name": pkg_name, "version": pkg_ver},
-                        category="package"
-                    )
-                    self._add_edge(agent_node_id, pkg_id, "installedPackage", "installed package")
-                    self._add_edge(vuln_id, pkg_id, "affectsPackage", "affects package")
 
         return {
             "metadata": {

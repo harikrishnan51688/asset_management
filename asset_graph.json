@@ -1,0 +1,608 @@
+{
+  "metadata": {
+    "total_nodes": 35,
+    "total_edges": 31,
+    "source": "Neo4j Database (CSV + Wazuh)"
+  },
+  "nodes": [
+    {
+      "id": "device_pc_fin_01",
+      "label": "Finance-Desktop-01 (192.168.1.110)",
+      "type": "Workstation",
+      "category": "agent",
+      "properties": {
+        "agent_id": "pc-fin-01",
+        "name": "Finance-Desktop-01",
+        "ip": "192.168.1.110",
+        "status": "active",
+        "source": "csv_import",
+        "is_managed": false,
+        "date_added": "Manual Import",
+        "description": "Accounts Team Primary Workstation"
+      }
+    },
+    {
+      "id": "os_device_pc_fin_01",
+      "label": "Windows 11 Pro 23H2",
+      "type": "OperatingSystem",
+      "category": "os",
+      "properties": {
+        "name": "Windows 11 Pro",
+        "version": "23H2",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "ip_192_168_1_110",
+      "label": "IP: 192.168.1.110",
+      "type": "IPAddress",
+      "category": "network",
+      "properties": {
+        "ip": "192.168.1.110",
+        "mac": "00:1A:2B:3C:4D:5E",
+        "type": "Static/Manual",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "hw_device_pc_fin_01",
+      "label": "HW: Intel Core i7-13700 (32GB)",
+      "type": "HardwareSpec",
+      "category": "hardware",
+      "properties": {
+        "cpu_name": "Intel Core i7-13700",
+        "ram_total": "32 GB",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "group_finance",
+      "label": "Group: Finance",
+      "type": "AgentGroup",
+      "category": "group",
+      "properties": {
+        "group_name": "Finance",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "port_445_tcp_device_pc_fin_01",
+      "label": "Port 445/tcp",
+      "type": "NetworkPort",
+      "category": "port",
+      "properties": {
+        "port": "445",
+        "protocol": "tcp",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "port_3389_tcp_device_pc_fin_01",
+      "label": "Port 3389/tcp",
+      "type": "NetworkPort",
+      "category": "port",
+      "properties": {
+        "port": "3389",
+        "protocol": "tcp",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "device_pc_fin_02",
+      "label": "Finance-Desktop-02 (192.168.1.111)",
+      "type": "Workstation",
+      "category": "agent",
+      "properties": {
+        "agent_id": "pc-fin-02",
+        "name": "Finance-Desktop-02",
+        "ip": "192.168.1.111",
+        "status": "active",
+        "source": "csv_import",
+        "is_managed": false,
+        "date_added": "Manual Import",
+        "description": "Auditing Workstation"
+      }
+    },
+    {
+      "id": "os_device_pc_fin_02",
+      "label": "Windows 11 Pro 23H2",
+      "type": "OperatingSystem",
+      "category": "os",
+      "properties": {
+        "name": "Windows 11 Pro",
+        "version": "23H2",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "ip_192_168_1_111",
+      "label": "IP: 192.168.1.111",
+      "type": "IPAddress",
+      "category": "network",
+      "properties": {
+        "ip": "192.168.1.111",
+        "mac": "00:1A:2B:3C:4D:5F",
+        "type": "Static/Manual",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "hw_device_pc_fin_02",
+      "label": "HW: Intel Core i5-13400 (16GB)",
+      "type": "HardwareSpec",
+      "category": "hardware",
+      "properties": {
+        "cpu_name": "Intel Core i5-13400",
+        "ram_total": "16 GB",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "port_445_tcp_device_pc_fin_02",
+      "label": "Port 445/tcp",
+      "type": "NetworkPort",
+      "category": "port",
+      "properties": {
+        "port": "445",
+        "protocol": "tcp",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "port_3389_tcp_device_pc_fin_02",
+      "label": "Port 3389/tcp",
+      "type": "NetworkPort",
+      "category": "port",
+      "properties": {
+        "port": "3389",
+        "protocol": "tcp",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "device_pc_hr_01",
+      "label": "HR-Laptop-01 (192.168.1.120)",
+      "type": "EndpointAgent",
+      "category": "agent",
+      "properties": {
+        "agent_id": "pc-hr-01",
+        "name": "HR-Laptop-01",
+        "ip": "192.168.1.120",
+        "status": "active",
+        "source": "csv_import",
+        "is_managed": false,
+        "date_added": "Manual Import",
+        "description": "HR Director MacBook"
+      }
+    },
+    {
+      "id": "os_device_pc_hr_01",
+      "label": "macOS Sonoma 14.5",
+      "type": "OperatingSystem",
+      "category": "os",
+      "properties": {
+        "name": "macOS Sonoma",
+        "version": "14.5",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "ip_192_168_1_120",
+      "label": "IP: 192.168.1.120",
+      "type": "IPAddress",
+      "category": "network",
+      "properties": {
+        "ip": "192.168.1.120",
+        "mac": "A4:83:E7:2B:11:0A",
+        "type": "Static/Manual",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "hw_device_pc_hr_01",
+      "label": "HW: Apple M2 Pro (16GB)",
+      "type": "HardwareSpec",
+      "category": "hardware",
+      "properties": {
+        "cpu_name": "Apple M2 Pro",
+        "ram_total": "16 GB",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "group_humanresources",
+      "label": "Group: HumanResources",
+      "type": "AgentGroup",
+      "category": "group",
+      "properties": {
+        "group_name": "HumanResources",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "port_22_tcp_device_pc_hr_01",
+      "label": "Port 22/tcp",
+      "type": "NetworkPort",
+      "category": "port",
+      "properties": {
+        "port": "22",
+        "protocol": "tcp",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "device_srv_backup_01",
+      "label": "NAS-Storage-Server (192.168.1.200)",
+      "type": "Server",
+      "category": "agent",
+      "properties": {
+        "agent_id": "srv-backup-01",
+        "name": "NAS-Storage-Server",
+        "ip": "192.168.1.200",
+        "status": "active",
+        "source": "csv_import",
+        "is_managed": false,
+        "date_added": "Manual Import",
+        "description": "Offline Local Backup NAS"
+      }
+    },
+    {
+      "id": "os_device_srv_backup_01",
+      "label": "Ubuntu Server 24.04",
+      "type": "OperatingSystem",
+      "category": "os",
+      "properties": {
+        "name": "Ubuntu Server",
+        "version": "24.04",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "ip_192_168_1_200",
+      "label": "IP: 192.168.1.200",
+      "type": "IPAddress",
+      "category": "network",
+      "properties": {
+        "ip": "192.168.1.200",
+        "mac": "00:25:90:AB:CD:EF",
+        "type": "Static/Manual",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "hw_device_srv_backup_01",
+      "label": "HW: AMD EPYC 7302P (64GB)",
+      "type": "HardwareSpec",
+      "category": "hardware",
+      "properties": {
+        "cpu_name": "AMD EPYC 7302P",
+        "ram_total": "64 GB",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "group_infrastructure",
+      "label": "Group: Infrastructure",
+      "type": "AgentGroup",
+      "category": "group",
+      "properties": {
+        "group_name": "Infrastructure",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "port_22_tcp_device_srv_backup_01",
+      "label": "Port 22/tcp",
+      "type": "NetworkPort",
+      "category": "port",
+      "properties": {
+        "port": "22",
+        "protocol": "tcp",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "port_80_tcp_device_srv_backup_01",
+      "label": "Port 80/tcp",
+      "type": "NetworkPort",
+      "category": "port",
+      "properties": {
+        "port": "80",
+        "protocol": "tcp",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "port_443_tcp_device_srv_backup_01",
+      "label": "Port 443/tcp",
+      "type": "NetworkPort",
+      "category": "port",
+      "properties": {
+        "port": "443",
+        "protocol": "tcp",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "port_2049_tcp_device_srv_backup_01",
+      "label": "Port 2049/tcp",
+      "type": "NetworkPort",
+      "category": "port",
+      "properties": {
+        "port": "2049",
+        "protocol": "tcp",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "device_pc_legacy_01",
+      "label": "Warehouse-Terminal (192.168.1.150)",
+      "type": "Workstation",
+      "category": "agent",
+      "properties": {
+        "agent_id": "pc-legacy-01",
+        "name": "Warehouse-Terminal",
+        "ip": "192.168.1.150",
+        "status": "disconnected",
+        "source": "csv_import",
+        "is_managed": false,
+        "date_added": "Manual Import",
+        "description": "Barcode Scanning Station"
+      }
+    },
+    {
+      "id": "os_device_pc_legacy_01",
+      "label": "Windows 10 Enterprise 21H2",
+      "type": "OperatingSystem",
+      "category": "os",
+      "properties": {
+        "name": "Windows 10 Enterprise",
+        "version": "21H2",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "ip_192_168_1_150",
+      "label": "IP: 192.168.1.150",
+      "type": "IPAddress",
+      "category": "network",
+      "properties": {
+        "ip": "192.168.1.150",
+        "mac": "00:14:22:98:76:54",
+        "type": "Static/Manual",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "hw_device_pc_legacy_01",
+      "label": "HW: Intel Core i3-8100 (8GB)",
+      "type": "HardwareSpec",
+      "category": "hardware",
+      "properties": {
+        "cpu_name": "Intel Core i3-8100",
+        "ram_total": "8 GB",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "group_logistics",
+      "label": "Group: Logistics",
+      "type": "AgentGroup",
+      "category": "group",
+      "properties": {
+        "group_name": "Logistics",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "port_139_tcp_device_pc_legacy_01",
+      "label": "Port 139/tcp",
+      "type": "NetworkPort",
+      "category": "port",
+      "properties": {
+        "port": "139",
+        "protocol": "tcp",
+        "source": "csv_import"
+      }
+    },
+    {
+      "id": "port_445_tcp_device_pc_legacy_01",
+      "label": "Port 445/tcp",
+      "type": "NetworkPort",
+      "category": "port",
+      "properties": {
+        "port": "445",
+        "protocol": "tcp",
+        "source": "csv_import"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "device_pc_fin_01",
+      "target": "os_device_pc_fin_01",
+      "relationship": "hasOS",
+      "label": "has OS"
+    },
+    {
+      "source": "device_pc_fin_01",
+      "target": "ip_192_168_1_110",
+      "relationship": "hasIP",
+      "label": "has IP"
+    },
+    {
+      "source": "device_pc_fin_01",
+      "target": "hw_device_pc_fin_01",
+      "relationship": "hasHardware",
+      "label": "has hardware"
+    },
+    {
+      "source": "device_pc_fin_01",
+      "target": "group_finance",
+      "relationship": "belongsToGroup",
+      "label": "belongs to group"
+    },
+    {
+      "source": "device_pc_fin_01",
+      "target": "port_445_tcp_device_pc_fin_01",
+      "relationship": "hasPort",
+      "label": "has port"
+    },
+    {
+      "source": "device_pc_fin_01",
+      "target": "port_3389_tcp_device_pc_fin_01",
+      "relationship": "hasPort",
+      "label": "has port"
+    },
+    {
+      "source": "device_pc_fin_02",
+      "target": "os_device_pc_fin_02",
+      "relationship": "hasOS",
+      "label": "has OS"
+    },
+    {
+      "source": "device_pc_fin_02",
+      "target": "ip_192_168_1_111",
+      "relationship": "hasIP",
+      "label": "has IP"
+    },
+    {
+      "source": "device_pc_fin_02",
+      "target": "hw_device_pc_fin_02",
+      "relationship": "hasHardware",
+      "label": "has hardware"
+    },
+    {
+      "source": "device_pc_fin_02",
+      "target": "group_finance",
+      "relationship": "belongsToGroup",
+      "label": "belongs to group"
+    },
+    {
+      "source": "device_pc_fin_02",
+      "target": "port_445_tcp_device_pc_fin_02",
+      "relationship": "hasPort",
+      "label": "has port"
+    },
+    {
+      "source": "device_pc_fin_02",
+      "target": "port_3389_tcp_device_pc_fin_02",
+      "relationship": "hasPort",
+      "label": "has port"
+    },
+    {
+      "source": "device_pc_hr_01",
+      "target": "os_device_pc_hr_01",
+      "relationship": "hasOS",
+      "label": "has OS"
+    },
+    {
+      "source": "device_pc_hr_01",
+      "target": "ip_192_168_1_120",
+      "relationship": "hasIP",
+      "label": "has IP"
+    },
+    {
+      "source": "device_pc_hr_01",
+      "target": "hw_device_pc_hr_01",
+      "relationship": "hasHardware",
+      "label": "has hardware"
+    },
+    {
+      "source": "device_pc_hr_01",
+      "target": "group_humanresources",
+      "relationship": "belongsToGroup",
+      "label": "belongs to group"
+    },
+    {
+      "source": "device_pc_hr_01",
+      "target": "port_22_tcp_device_pc_hr_01",
+      "relationship": "hasPort",
+      "label": "has port"
+    },
+    {
+      "source": "device_srv_backup_01",
+      "target": "os_device_srv_backup_01",
+      "relationship": "hasOS",
+      "label": "has OS"
+    },
+    {
+      "source": "device_srv_backup_01",
+      "target": "ip_192_168_1_200",
+      "relationship": "hasIP",
+      "label": "has IP"
+    },
+    {
+      "source": "device_srv_backup_01",
+      "target": "hw_device_srv_backup_01",
+      "relationship": "hasHardware",
+      "label": "has hardware"
+    },
+    {
+      "source": "device_srv_backup_01",
+      "target": "group_infrastructure",
+      "relationship": "belongsToGroup",
+      "label": "belongs to group"
+    },
+    {
+      "source": "device_srv_backup_01",
+      "target": "port_22_tcp_device_srv_backup_01",
+      "relationship": "hasPort",
+      "label": "has port"
+    },
+    {
+      "source": "device_srv_backup_01",
+      "target": "port_80_tcp_device_srv_backup_01",
+      "relationship": "hasPort",
+      "label": "has port"
+    },
+    {
+      "source": "device_srv_backup_01",
+      "target": "port_443_tcp_device_srv_backup_01",
+      "relationship": "hasPort",
+      "label": "has port"
+    },
+    {
+      "source": "device_srv_backup_01",
+      "target": "port_2049_tcp_device_srv_backup_01",
+      "relationship": "hasPort",
+      "label": "has port"
+    },
+    {
+      "source": "device_pc_legacy_01",
+      "target": "os_device_pc_legacy_01",
+      "relationship": "hasOS",
+      "label": "has OS"
+    },
+    {
+      "source": "device_pc_legacy_01",
+      "target": "ip_192_168_1_150",
+      "relationship": "hasIP",
+      "label": "has IP"
+    },
+    {
+      "source": "device_pc_legacy_01",
+      "target": "hw_device_pc_legacy_01",
+      "relationship": "hasHardware",
+      "label": "has hardware"
+    },
+    {
+      "source": "device_pc_legacy_01",
+      "target": "group_logistics",
+      "relationship": "belongsToGroup",
+      "label": "belongs to group"
+    },
+    {
+      "source": "device_pc_legacy_01",
+      "target": "port_139_tcp_device_pc_legacy_01",
+      "relationship": "hasPort",
+      "label": "has port"
+    },
+    {
+      "source": "device_pc_legacy_01",
+      "target": "port_445_tcp_device_pc_legacy_01",
+      "relationship": "hasPort",
+      "label": "has port"
+    }
+  ]
+}

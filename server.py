@@ -45,10 +45,6 @@ class AssetManagementHTTPHandler(http.server.SimpleHTTPRequestHandler):
         elif parsed_path == "/api/agents":
             agents = WazuhMCPToolHandler.list_agents()
             self._send_json(agents)
-        elif parsed_path.startswith("/api/vulnerabilities/"):
-            agent_id = parsed_path.split("/")[-1]
-            vulns = WazuhMCPToolHandler.get_agent_vulnerabilities(agent_id)
-            self._send_json(vulns)
         elif parsed_path == "/sample_assets.csv":
             sample_path = os.path.join(os.path.dirname(__file__), "sample_assets.csv")
             self._send_file(sample_path, "text/csv")

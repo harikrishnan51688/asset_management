@@ -6,10 +6,10 @@ A containerized IT Asset Management Knowledge Graph system, powered by **Neo4j G
 
 ## 🌟 Key Features
 
-1. **Neo4j Graph Database Backend**: Replaces static Turtle TTL files with a production-grade Neo4j graph database. Stores agents, hardware specs, operating systems, network interfaces, open ports, software packages, and vulnerabilities as nodes and relationships (`HAS_OS`, `HAS_IP`, `HAS_VULNERABILITY`, `INSTALLED_PACKAGE`, `MANAGED_BY`, etc.).
+1. **Neo4j Graph Database Backend**: Replaces static Turtle TTL files with a production-grade Neo4j graph database. Stores agents, hardware specs, operating systems, network interfaces, open ports, and agent groups as nodes and relationships (`HAS_OS`, `HAS_IP`, `HAS_HARDWARE`, `HAS_PORT`, `BELONGS_TO_GROUP`, `MANAGED_BY`, etc.).
 2. **Automated Wazuh API Collector & Sync**: Connects to Wazuh REST API (`https://192.168.1.38:55000`), authenticates with JWT tokens, and automatically ingests knowledge graph telemetry into Neo4j.
-3. **Model Context Protocol (MCP) Server for AI Chatbots**: Exposes standard MCP tools (`get_asset_summary`, `list_agents`, `get_agent_vulnerabilities`, `search_assets`, `refresh_wazuh_data`) so LLMs (Claude Desktop, Cursor, Gemini, VS Code AI) can directly query Neo4j assets and security posture.
-4. **Interactive Glassmorphism Dashboard**: Vis.js network visualizer with node filtering, CVE severity color highlights, node inspector drawer, and live sync with Neo4j & Wazuh REST API.
+3. **Model Context Protocol (MCP) Server for AI Chatbots**: Exposes standard MCP tools (`get_asset_summary`, `list_agents`, `search_assets`, `refresh_wazuh_data`) so LLMs (Claude Desktop, Cursor, Gemini, VS Code AI) can directly query Neo4j assets and topology.
+4. **Interactive Glassmorphism Dashboard**: Vis.js network visualizer with category filtering, node inspector drawer, and live sync with Neo4j & Wazuh REST API.
 5. **Full Dockerization**: One-command launch via `docker compose up -d` for both Neo4j Database and the Asset Management application.
 
 ---
@@ -158,10 +158,9 @@ To run the MCP server directly via the Docker container:
 ```
 
 ### Available MCP Tools
-- **`get_asset_summary`**: High-level overview of connected agents, unique IP addresses, operating systems, and vulnerability severity counts.
+- **`get_asset_summary`**: High-level overview of connected agents, unique IP addresses, and operating systems.
 - **`list_agents`**: List all Wazuh agents filtered by status (`active`, `disconnected`, etc.).
-- **`get_agent_vulnerabilities`**: Retrieve CVEs, CVSS scores, and affected software packages for a specified agent ID.
-- **`search_assets`**: Keyword search across all Neo4j nodes (IPs, CVEs, OS, packages, agents).
+- **`search_assets`**: Keyword search across all Neo4j nodes (IPs, OS, hardware, ports, agents).
 - **`refresh_wazuh_data`**: Fetch live telemetry from Wazuh REST API and update Neo4j.
 
 ---
@@ -174,10 +173,10 @@ You can open the Neo4j Browser UI at `http://localhost:7474` and run Cypher quer
   ```cypher
   MATCH (n)-[r]->(m) RETURN n, r, m LIMIT 100;
   ```
-- **Find Critical Vulnerabilities**:
+- **Find Agents by Operating System**:
   ```cypher
-  MATCH (a:AssetNode)-[:HAS_VULNERABILITY]->(v:Vulnerability {severity: 'Critical'})
-  RETURN a.name AS Agent, v.cve_id AS CVE, v.title AS Description;
+  MATCH (a:AssetNode)-[:HAS_OS]->(os:OperatingSystem)
+  RETURN a.name AS Agent, os.label AS OperatingSystem;
   ```
 - **List All Agent IP Addresses**:
   ```cypher
